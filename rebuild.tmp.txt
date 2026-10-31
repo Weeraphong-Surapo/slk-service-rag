@@ -1,0 +1,54 @@
+ Image express_rag-api Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 543B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 379B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:22-alpine
+#3 DONE 0.4s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 135B done
+#4 DONE 0.0s
+
+#5 [1/6] FROM docker.io/library/node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914
+#5 resolve docker.io/library/node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914 0.0s done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 1.52kB done
+#6 DONE 0.0s
+
+#7 [2/6] WORKDIR /app
+#7 CACHED
+
+#8 [3/6] COPY package.json package-lock.json ./
+#8 CACHED
+
+#9 [5/6] COPY src ./src
+#9 CACHED
+
+#10 [4/6] RUN npm ci --omit=dev && npm cache clean --force
+#10 CACHED
+
+#11 [6/6] RUN mkdir -p /app/uploads && chown -R node:node /app
+#11 CACHED
+
+#12 exporting to image
+#12 exporting layers done
+#12 exporting manifest sha256:1ee98c4cf32b3f5d1f3e94f60bec990d639b2eb8f70e1f7113eb2d0eb1c5611e done
+#12 exporting config sha256:f1486032eaa51754d5e96b6431f2e392dae427ee4a8e02b90cfe3e5508973abb done
+#12 exporting attestation manifest sha256:fa399c0dfd6b32d104ccf36438b39cc294e96c87ce6772b84860993f825a76b3 done
+#12 exporting manifest list sha256:7b6d6bd2fa24c4397d634017776b4519f6997820db156fc8e17934f171acb98f done
+#12 naming to docker.io/library/express_rag-api:latest done
+#12 unpacking to docker.io/library/express_rag-api:latest done
+#12 DONE 0.1s
+
+#13 resolving provenance for metadata file
+#13 DONE 0.0s
+ Image express_rag-api Built 
+ Container express_rag-api-1 Starting 
+ Container express_rag-api-1 Started 

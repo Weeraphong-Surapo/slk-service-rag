@@ -21,7 +21,9 @@ const router = express.Router();
  *       Saves the file and starts processing in the background
  *       (extract text, split into chunks, embed, store in Qdrant).
  *       Poll GET /documents/{id} until status is "ready" or "failed".
- *       Supported types: .pdf, .docx, .txt, .md
+ *       Supported types: .pdf, .docx, .txt, .md, .png, .jpg, .jpeg, .webp.
+ *       Images and scanned or broken-text PDF pages are read with Typhoon OCR
+ *       (see PDF_OCR_MODE).
  *     requestBody:
  *       required: true
  *       content:

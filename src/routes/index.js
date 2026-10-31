@@ -1,6 +1,7 @@
 const express = require('express');
 const documentRoutes = require('./document.routes');
 const chatRoutes = require('./chat.routes');
+const ocrRoutes = require('./ocr.routes');
 
 const router = express.Router();
 
@@ -20,5 +21,6 @@ router.get('/health', (req, res) => {
 
 router.use('/documents', documentRoutes);
 router.use('/chat', chatRoutes);
+router.use('/ocr', ocrRoutes);
 
 module.exports = router;

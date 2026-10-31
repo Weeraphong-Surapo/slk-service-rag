@@ -95,6 +95,24 @@ npm run dev
 - GET    /api/v1/documents/:id
 - DELETE /api/v1/documents/:id
 - POST   /api/v1/chat            `{ "question": "...", "topK": 5 }`
+- POST   /api/v1/ocr             (multipart: `image`, `format`, `prompt`, `schema`)
+
+## OCR (Typhoon OCR)
+
+ใช้โมเดล `scb10x/typhoon-ocr1.5-3b` อ่านข้อความไทย/อังกฤษจากภาพ
+
+- **อัปโหลดเอกสาร**: รับ .png .jpg .jpeg .webp ได้ด้วย และหน้า PDF ที่ไม่มีข้อความ (สแกน) หรือข้อความไทยเพี้ยน จะถูกแปลงเป็นภาพแล้ว OCR ตาม `PDF_OCR_MODE`
+  - `auto` (ค่าเริ่มต้น): OCR เฉพาะหน้าที่ไม่มีข้อความ หรือพบรูปแบบไทยเพี้ยน เช่น "ล านบาท" ตั้งแต่ `OCR_BROKEN_THAI_THRESHOLD` จุด
+  - `always`: OCR ทุกหน้า (ช้าที่สุด แต่ข้อความดีที่สุด)
+  - `never`: ใช้ข้อความใน PDF อย่างเดียว
+- **`POST /api/v1/ocr`**: multipart fields `image` (บังคับ), `format`, `prompt`, `schema`
+  - `format=text`: OCR อย่างเดียว เร็วที่สุด ไม่เรียกโมเดลแชต
+  - `format=answer`: OCR + `prompt` (บังคับ) ได้คำตอบเป็นข้อความ
+  - `format=json`: OCR + `prompt` ได้ JSON object ส่ง `schema` (JSON Schema เป็น string) เพื่อกำหนดโครงได้
+  - ไม่ส่ง `format`: มี prompt = `answer`, ไม่มี = `text`
+  - ตอบกลับ `{ format, text, answer, json }` ช่องที่ไม่ได้ใช้เป็น `null`
+
+Typhoon OCR ทำได้แค่อ่านข้อความ ตอบคำถามเกี่ยวกับภาพเองไม่ได้ จึงต้องส่งข้อความที่อ่านได้ต่อให้โมเดลแชตตอบ
 
 ## ค่าที่ปรับได้ใน `.env`
 

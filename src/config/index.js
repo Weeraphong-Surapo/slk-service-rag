@@ -36,6 +36,22 @@ module.exports = {
     // bge-m3 produces 1024-dimension vectors
     embedDimension: toNumber(process.env.OLLAMA_EMBED_DIMENSION, 1024),
     timeoutMs: toNumber(process.env.OLLAMA_TIMEOUT_MS, 120000),
+    // Typhoon OCR: reads Thai/English text from images and scanned PDF pages
+    ocrModel: process.env.OLLAMA_OCR_MODEL || 'scb10x/typhoon-ocr1.5-3b',
+    ocrTimeoutMs: toNumber(process.env.OLLAMA_OCR_TIMEOUT_MS, 300000),
+  },
+
+  ocr: {
+    // auto   = OCR only PDF pages with no text or broken Thai text
+    // always = OCR every PDF page (slow, best for Thai PDFs)
+    // never  = use the PDF text layer only
+    pdfMode: process.env.PDF_OCR_MODE || 'auto',
+    // A page with fewer non-space characters than this is treated as scanned
+    minPageChars: toNumber(process.env.OCR_MIN_PAGE_CHARS, 30),
+    // A page with at least this many broken Thai patterns is OCRed in auto mode
+    brokenThaiThreshold: toNumber(process.env.OCR_BROKEN_THAI_THRESHOLD, 3),
+    // Longest image side sent to the OCR model
+    maxImageDimension: toNumber(process.env.OCR_MAX_IMAGE_DIMENSION, 1800),
   },
 
   rag: {

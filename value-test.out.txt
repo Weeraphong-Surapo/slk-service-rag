@@ -1,0 +1,4 @@
+run 1 CORRECT 11271ms {"invoiceNo":"INV-0042","date":"2026-10-31","paymentMethod":"transfer","items":[{"name":"ลาเต้เย็น","qty":2,"amount":120},{"name":"ครัวซองต์","qty":1,"amount":65}],"total":185}
+run 2 CORRECT 11234ms {"invoiceNo":"INV-0042","date":"2026-10-31","paymentMethod":"transfer","items":[{"name":"ลาเต้เย็น","qty":2,"amount":120},{"name":"ครัวซองต์","qty":1,"amount":65}],"total":185}
+run 3 CORRECT 11210ms {"invoiceNo":"INV-0042","date":"2026-10-31","paymentMethod":"transfer","items":[{"name":"ลาเต้เย็น","qty":2,"amount":120},{"name":"ครัวซองต์","qty":1,"amount":65}],"total":185}
+done

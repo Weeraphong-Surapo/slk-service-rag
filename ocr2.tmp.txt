@@ -1,0 +1,34 @@
+﻿PDFParse.d.ts:5: import { ScreenshotResult } from './ScreenshotResult.js';
+PDFParse.d.ts:10: * Loads PDF documents and exposes helpers for text, image, table, metadata, and screenshot extraction.
+PDFParse.d.ts:49: * - Pages are selected according to ParseParameters (partial, first, last).
+PDFParse.d.ts:52: *     - data: Uint8Array (present when params.imageBuffer === true)
+PDFParse.d.ts:53: *     - dataUrl: string (present when params.imageDataUrl === true)
+PDFParse.d.ts:64: * Render pages to raster screenshots.
+PDFParse.d.ts:67: * - Pages are selected according to ParseParameters (partial, first, last).
+PDFParse.d.ts:68: * - Use params.scale for zoom; if params.desiredWidth is specified it takes precedence.
+PDFParse.d.ts:69: * - Each ScreenshotResult page contains:
+PDFParse.d.ts:70: *     - data: Uint8Array (when params.imageBuffer === true)
+PDFParse.d.ts:71: *     - dataUrl: string (when params.imageDataUrl === true)
+PDFParse.d.ts:72: *     - pageNumber, width, height, scale
+PDFParse.d.ts:76: * @returns Promise<ScreenshotResult> with rendered page images.
+PDFParse.d.ts:78: getScreenshot(parseParams?: ParseParameters): Promise<ScreenshotResult>;
+PDFParse.d.ts:87: * @param params - ParseParameters controlling which pages to analyse (partial/first/last).
+ParseParameters.d.ts:13: partial?: Array<number>;
+ParseParameters.d.ts:15: * Parse the first N pages (pages 1..N).
+ParseParameters.d.ts:16: * Ignored when `partial` is provided. If both `first` and `last` are set, they define
+ParseParameters.d.ts:17: * an explicit inclusive page range (first..last) and this "first N" semantics is ignored.
+ParseParameters.d.ts:20: first?: number;
+ParseParameters.d.ts:22: * Parse the last N pages (pages total-N+1..total).
+ParseParameters.d.ts:23: * Ignored when `partial` is provided. If both `first` and `last` are set, they define
+ParseParameters.d.ts:24: * an explicit inclusive page range (first..last) and this "last N" semantics is ignored.
+ParseParameters.d.ts:27: last?: number;
+ParseParameters.d.ts:87: * Screenshot scale factor: use 1 for the original size, 1.5 for a 50% larger image, etc.
+ParseParameters.d.ts:90: scale?: number;
+ParseParameters.d.ts:92: * Desired screenshot width in pixels.
+ParseParameters.d.ts:93: * When set, the scale option is ignored.
+ParseParameters.d.ts:96: desiredWidth?: number;
+ParseParameters.d.ts:98: * Applies to both getImage() and getScreenshot(): include the image as a base64 data URL string.
+ParseParameters.d.ts:101: imageDataUrl?: boolean;
+ParseParameters.d.ts:103: * Applies to both getImage() and getScreenshot(): include the image as a binary buffer.
+ParseParameters.d.ts:106: imageBuffer?: boolean;
+ParseParameters.d.ts:125: export type SafeParseParameters = Required<Pick<ParseParameters, 'lineThreshold' | 'cellThreshold' | 'scale'>> & ParseParameters;

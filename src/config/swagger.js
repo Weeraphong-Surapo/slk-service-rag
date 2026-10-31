@@ -72,6 +72,21 @@ const options = {
             },
           },
         },
+        OcrResponse: {
+          type: 'object',
+          properties: {
+            format: { type: 'string', enum: ['text', 'answer', 'json'], example: 'json' },
+            text: { type: 'string', description: 'Text read from the image (Markdown, tables as HTML). Always set.' },
+            answer: { type: 'string', nullable: true, description: 'Text answer. Set only when format is answer.' },
+            json: {
+              type: 'object',
+              nullable: true,
+              additionalProperties: true,
+              description: 'Extracted JSON object. Set only when format is json.',
+              example: { storeName: 'ร้าน ABC', date: '2026-10-31', items: [{ name: 'กาแฟ', qty: 2, price: 60 }], total: 120 },
+            },
+          },
+        },
         Error: {
           type: 'object',
           properties: {

@@ -1,43 +1,82 @@
 const path = require('path');
 const swaggerJsdoc = require('swagger-jsdoc');
-const config = require('./index');
 
 const options = {
   definition: {
     openapi: '3.0.3',
     info: {
-      title: 'Express API',
+      title: 'RAG API',
       version: '1.0.0',
-      description: 'API documentation',
+      description: 'Document upload and question answering with Qdrant, MySQL and Ollama',
     },
     servers: [
       {
-        url: `http://localhost:${config.port}/api/v1`,
+        // Relative URL works on any host/port (local or Docker)
+        url: '/api/v1',
       },
     ],
     components: {
       schemas: {
-        User: {
+        Document: {
           type: 'object',
           properties: {
             id: { type: 'integer', example: 1 },
-            name: { type: 'string', example: 'Alice' },
-            email: { type: 'string', example: 'alice@example.com' },
+            original_name: { type: 'string', example: 'handbook.pdf' },
+            mime_type: { type: 'string', example: 'application/pdf' },
+            size_bytes: { type: 'integer', example: 204800 },
+            status: { type: 'string', enum: ['processing', 'ready', 'failed'], example: 'ready' },
+            chunk_count: { type: 'integer', example: 42 },
+            error_message: { type: 'string', nullable: true, example: null },
+            created_at: { type: 'string', format: 'date-time' },
+            updated_at: { type: 'string', format: 'date-time' },
           },
         },
-        UserInput: {
+        DocumentDetail: {
+          allOf: [
+            { $ref: '#/components/schemas/Document' },
+            {
+              type: 'object',
+              properties: {
+                stored_name: { type: 'string', example: '1730000000000-5f1c....pdf' },
+                content: { type: 'string', nullable: true, description: 'Extracted raw text' },
+              },
+            },
+          ],
+        },
+        ChatRequest: {
           type: 'object',
-          required: ['name', 'email'],
+          required: ['question'],
           properties: {
-            name: { type: 'string', example: 'Alice' },
-            email: { type: 'string', example: 'alice@example.com' },
+            question: { type: 'string', example: 'นโยบายการลาพักร้อนเป็นอย่างไร' },
+            topK: { type: 'integer', minimum: 1, maximum: 20, example: 5 },
+          },
+        },
+        ChatSource: {
+          type: 'object',
+          properties: {
+            ref: { type: 'integer', example: 1 },
+            documentId: { type: 'integer', example: 1 },
+            fileName: { type: 'string', example: 'handbook.pdf' },
+            chunkIndex: { type: 'integer', example: 3 },
+            score: { type: 'number', example: 0.82 },
+            text: { type: 'string' },
+          },
+        },
+        ChatResponse: {
+          type: 'object',
+          properties: {
+            answer: { type: 'string' },
+            sources: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/ChatSource' },
+            },
           },
         },
         Error: {
           type: 'object',
           properties: {
             success: { type: 'boolean', example: false },
-            message: { type: 'string', example: 'User not found' },
+            message: { type: 'string', example: 'Document not found' },
           },
         },
       },

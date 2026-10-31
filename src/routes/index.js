@@ -1,5 +1,6 @@
 const express = require('express');
-const userRoutes = require('./user.routes');
+const documentRoutes = require('./document.routes');
+const chatRoutes = require('./chat.routes');
 
 const router = express.Router();
 
@@ -17,6 +18,7 @@ router.get('/health', (req, res) => {
   res.json({ success: true, message: 'OK' });
 });
 
-router.use('/users', userRoutes);
+router.use('/documents', documentRoutes);
+router.use('/chat', chatRoutes);
 
 module.exports = router;

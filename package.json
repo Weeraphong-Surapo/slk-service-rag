@@ -1,21 +1,26 @@
 {
   "name": "express-rag-api",
   "version": "1.0.0",
-  "description": "Express REST API starter",
+  "description": "RAG API with Express, Qdrant, MySQL and Ollama",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22.3.0"
   },
   "dependencies": {
+    "@qdrant/js-client-rest": "1.20.0",
     "cors": "2.8.5",
     "dotenv": "16.4.7",
     "express": "4.21.2",
     "helmet": "8.0.0",
+    "mammoth": "1.13.0",
     "morgan": "1.10.0",
+    "multer": "2.5.0",
+    "mysql2": "3.24.6",
+    "pdf-parse": "2.4.5",
     "swagger-jsdoc": "6.2.8",
     "swagger-ui-express": "5.0.1"
   },

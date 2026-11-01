@@ -11,6 +11,8 @@ const start = async () => {
   const server = app.listen(config.port, () => {
     console.log(`Server running on port ${config.port} (${config.env})`);
   });
+  // Multi-page bank statements can take several minutes (Node's default limit is 5 minutes)
+  server.requestTimeout = 20 * 60 * 1000;
 
   // Graceful shutdown
   const shutdown = () => {

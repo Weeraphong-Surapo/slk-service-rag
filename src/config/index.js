@@ -39,6 +39,21 @@ module.exports = {
     // Typhoon OCR: reads Thai/English text from images and scanned PDF pages
     ocrModel: process.env.OLLAMA_OCR_MODEL || 'scb10x/typhoon-ocr1.5-3b',
     ocrTimeoutMs: toNumber(process.env.OLLAMA_OCR_TIMEOUT_MS, 300000),
+    // Context window for OCR. The image alone uses thousands of tokens, so Ollama's
+    // small default cut the text off in the middle of a table.
+    // 8192 fits a full statement page; 16384 made the chat and OCR models too big to stay in 16 GB VRAM together
+    ocrContextLength: toNumber(process.env.OLLAMA_OCR_NUM_CTX, 8192),
+    // Context window for JSON extraction. A statement page plus its JSON reply
+    // does not fit in Ollama's small default context.
+    jsonContextLength: toNumber(process.env.OLLAMA_JSON_NUM_CTX, 8192),
+    // auto = try Ollama structured outputs first; off = prompt-only JSON (skip the try).
+    // Typhoon 2.1 (Gemma 3) does not support structured outputs, so "off" saves a failed request.
+    jsonFormat: process.env.OLLAMA_JSON_FORMAT || 'auto',
+  },
+
+  statement: {
+    // Larger statements take several minutes; reject them instead of timing out
+    maxPages: toNumber(process.env.STATEMENT_MAX_PAGES, 30),
   },
 
   ocr: {

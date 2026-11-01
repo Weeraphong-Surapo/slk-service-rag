@@ -87,6 +87,129 @@ const options = {
             },
           },
         },
+        BankStatementResponse: {
+          type: 'object',
+          properties: {
+            account: {
+              type: 'object',
+              properties: {
+                bankName: { type: 'string', nullable: true, example: 'Example Bank' },
+                accountNo: { type: 'string', nullable: true, example: '123-4-56789-0' },
+                accountName: { type: 'string', nullable: true, example: 'ABC Co., Ltd.' },
+                periodFrom: { type: 'string', nullable: true, example: '2026-10-01' },
+                periodTo: { type: 'string', nullable: true, example: '2026-10-31' },
+                periodFromRaw: { type: 'string', nullable: true, example: '01/10/2569' },
+                periodToRaw: { type: 'string', nullable: true, example: '31/10/2569' },
+                openingBalance: { type: 'number', nullable: true, example: 50000 },
+                closingBalance: {
+                  type: 'number',
+                  nullable: true,
+                  example: 61250,
+                  description: 'Printed closing balance, or the last row balance when none is printed (see check.closingBalanceSource)',
+                },
+                totalDebit: { type: 'number', nullable: true, example: 3750, description: 'Total withdrawals printed on the statement' },
+                totalCredit: { type: 'number', nullable: true, example: 15000, description: 'Total deposits printed on the statement' },
+                currency: { type: 'string', nullable: true, example: 'THB' },
+              },
+            },
+            transactions: {
+              type: 'array',
+              description: 'Always oldest first',
+              items: {
+                type: 'object',
+                properties: {
+                  page: { type: 'integer', example: 1 },
+                  date: { type: 'string', nullable: true, example: '2026-10-03' },
+                  dateRaw: { type: 'string', nullable: true, example: '03/10/69' },
+                  time: { type: 'string', nullable: true, example: '14:05' },
+                  description: { type: 'string', nullable: true, example: 'Transfer in' },
+                  debit: { type: 'number', nullable: true, example: null },
+                  credit: { type: 'number', nullable: true, example: 15000 },
+                  balance: { type: 'number', nullable: true, example: 65000 },
+                },
+              },
+            },
+            check: {
+              type: 'object',
+              properties: {
+                balanceOk: { type: 'boolean', example: true },
+                order: { type: 'string', enum: ['oldest-first', 'newest-first'], example: 'oldest-first' },
+                transactionCount: { type: 'integer', example: 2 },
+                firstRowChecked: { type: 'boolean', example: true },
+                closingBalanceOk: {
+                  type: 'boolean',
+                  nullable: true,
+                  example: true,
+                  description: 'Printed closing balance equals the last row balance. null when no closing balance is printed',
+                },
+                closingBalanceSource: {
+                  type: 'string',
+                  nullable: true,
+                  enum: ['printed', 'last-row', null],
+                  example: 'printed',
+                },
+                totalsOk: {
+                  type: 'boolean',
+                  nullable: true,
+                  example: true,
+                  description: 'Sum of rows equals the printed totals row. null when no totals are printed. '
+                    + 'false with rowsProven true means the totals row was misread; use sumDebit and sumCredit',
+                },
+                rowsProven: {
+                  type: 'boolean',
+                  example: true,
+                  description: 'Every row has a balance and adds up from the opening balance, so every amount is confirmed',
+                },
+                sumDebit: { type: 'number', example: 3750, description: 'Sum of debit in transactions' },
+                sumCredit: { type: 'number', example: 15000, description: 'Sum of credit in transactions' },
+                skippedBalanceRows: {
+                  type: 'integer',
+                  example: 1,
+                  description: 'Rows with a balance but no amount (e.g. Previous balance) that were not counted as transactions',
+                },
+                correctedRows: {
+                  type: 'array',
+                  description: 'Rows where debit and credit were swapped because the balance proved the direction',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      index: { type: 'integer' },
+                      page: { type: 'integer' },
+                      date: { type: 'string', nullable: true },
+                      description: { type: 'string', nullable: true },
+                      fix: { type: 'string', example: 'swapped debit/credit' },
+                    },
+                  },
+                  example: [],
+                },
+                mismatchedRows: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      index: { type: 'integer', description: 'Position in transactions' },
+                      page: { type: 'integer' },
+                      date: { type: 'string', nullable: true },
+                      description: { type: 'string', nullable: true },
+                      expectedBalance: { type: 'number' },
+                      balance: { type: 'number' },
+                      difference: { type: 'number' },
+                    },
+                  },
+                  example: [],
+                },
+                pageCount: { type: 'integer', example: 1 },
+                ocrPages: { type: 'array', items: { type: 'integer' }, example: [] },
+                tablePages: {
+                  type: 'array',
+                  items: { type: 'integer' },
+                  example: [1],
+                  description: 'Pages whose rows were read from the OCR table by code; other pages were read by the model',
+                },
+              },
+            },
+          },
+        },
         Error: {
           type: 'object',
           properties: {

@@ -1,6 +1,6 @@
 const path = require('path');
 const mammoth = require('mammoth');
-const { PDFParse } = require('pdf-parse');
+const { PDFParse, PasswordException, InvalidPDFException } = require('pdf-parse');
 const config = require('../config');
 const AppError = require('./AppError');
 const ocrService = require('../services/ocr.service');
@@ -45,26 +45,63 @@ const ocrPdfPage = async (parser, pageNumber) => {
   return ocrService.ocrImage(Buffer.from(result.pages[0].data));
 };
 
-// Use the PDF text layer where it is good, and OCR the pages where it is missing or broken
-const extractPdf = async (buffer, fileName) => {
-  const parser = new PDFParse({ data: buffer });
-  try {
-    const textResult = await parser.getText({ pageJoiner: '' });
-    const pages = [];
+// Turn pdf.js errors into clear 400 responses
+const toPdfError = (err, password) => {
+  if (err instanceof PasswordException || err.name === 'PasswordException') {
+    if (password === undefined || password === '') {
+      return new AppError('The PDF is password protected. Send the password in the "password" field', 400);
+    }
+    return new AppError('The PDF password is incorrect', 400);
+  }
+  if (err instanceof InvalidPDFException || err.name === 'InvalidPDFException') {
+    return new AppError('The file is not a valid PDF', 400);
+  }
+  return err;
+};
 
-    for (const page of textResult.pages) {
-      if (pageNeedsOcr(page.text)) {
-        console.log(`OCR ${fileName} page ${page.num}/${textResult.total}`);
-        pages.push(await ocrPdfPage(parser, page.num));
-      } else {
-        pages.push(page.text);
-      }
+// Read a PDF page by page. Uses the text layer where it is good and OCRs pages where it is
+// missing or broken. Returns [{ num, text, ocr }].
+const readPdfPages = async (buffer, { password, maxPages, label = 'PDF' } = {}) => {
+  const options = { data: buffer };
+  if (password !== undefined && password !== '') {
+    options.password = password;
+  }
+
+  const parser = new PDFParse(options);
+  try {
+    let textResult;
+    try {
+      textResult = await parser.getText({ pageJoiner: '' });
+    } catch (err) {
+      throw toPdfError(err, password);
     }
 
-    return pages.join('\n\n');
+    if (maxPages !== undefined && textResult.total > maxPages) {
+      throw new AppError(`The PDF has ${textResult.total} pages, the maximum is ${maxPages}`, 400);
+    }
+
+    const pages = [];
+    for (const page of textResult.pages) {
+      if (pageNeedsOcr(page.text)) {
+        console.log(`OCR ${label} page ${page.num}/${textResult.total}`);
+        pages.push({ num: page.num, text: await ocrPdfPage(parser, page.num), ocr: true });
+      } else {
+        pages.push({ num: page.num, text: page.text, ocr: false });
+      }
+    }
+    return pages;
   } finally {
     await parser.destroy();
   }
+};
+
+const extractPdf = async (buffer, fileName) => {
+  const pages = await readPdfPages(buffer, { label: fileName });
+  return pages
+    .map((page) => {
+      return page.text;
+    })
+    .join('\n\n');
 };
 
 const extractDocx = async (buffer) => {
@@ -92,4 +129,4 @@ const extractText = async (buffer, fileName) => {
   throw new AppError(`Unsupported file type: ${extension}`, 400);
 };
 
-module.exports = { extractText, SUPPORTED_EXTENSIONS, IMAGE_EXTENSIONS };
+module.exports = { extractText, readPdfPages, SUPPORTED_EXTENSIONS, IMAGE_EXTENSIONS };

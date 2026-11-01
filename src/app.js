@@ -22,7 +22,16 @@ if (config.swaggerEnabled) {
   const swaggerUi = require('swagger-ui-express');
   const swaggerSpec = require('./config/swagger');
 
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  // Taller, monospace text boxes for JSON fields such as the OCR "schema"
+  const customCss = `
+    .swagger-ui textarea.body-param__text {
+      min-height: 320px;
+      font-family: Consolas, Menlo, monospace;
+      font-size: 13px;
+      resize: vertical;
+    }
+  `;
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customCss }));
   app.get('/api-docs.json', (req, res) => {
     res.json(swaggerSpec);
   });

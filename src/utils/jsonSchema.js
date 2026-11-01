@@ -40,6 +40,59 @@ const allowNull = (schema) => {
   return copy;
 };
 
+// Simple template types: "string", "number", "integer", "boolean"
+const SIMPLE_TYPES = ['string', 'number', 'integer', 'boolean'];
+
+// A full JSON Schema has "type": "object" and a "properties" object at the top level
+const isFullSchema = (value) => {
+  return value.type === 'object' && value.properties !== null && typeof value.properties === 'object';
+};
+
+// Convert the simple template into a JSON Schema. Every field becomes required.
+//   { "total": "number" }                -> number field
+//   { "items": [{ "name": "string" }] }  -> array of objects
+//   { "seller": { "name": "string" } }   -> nested object
+const templateToSchema = (value, path) => {
+  if (typeof value === 'string') {
+    if (!SIMPLE_TYPES.includes(value)) {
+      throw new AppError(
+        `schema ${path}: unknown type "${value}". Use ${SIMPLE_TYPES.join(', ')}, an object {...} or a list [...]`,
+        400,
+      );
+    }
+    return { type: value };
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length !== 1) {
+      throw new AppError(`schema ${path}: a list must contain exactly one item template, e.g. [{"name":"string"}]`, 400);
+    }
+    return { type: 'array', items: templateToSchema(value[0], `${path}[]`) };
+  }
+
+  if (value !== null && typeof value === 'object') {
+    const keys = Object.keys(value);
+    if (keys.length === 0) {
+      throw new AppError(`schema ${path}: an object must have at least one field`, 400);
+    }
+    const properties = {};
+    for (const key of keys) {
+      properties[key] = templateToSchema(value[key], `${path}.${key}`);
+    }
+    return { type: 'object', properties, required: keys };
+  }
+
+  throw new AppError(`schema ${path}: use a type name such as "string" or "number"`, 400);
+};
+
+// Accept a full JSON Schema or the simple template, always return a JSON Schema
+const toJsonSchema = (value) => {
+  if (isFullSchema(value)) {
+    return value;
+  }
+  return templateToSchema(value, 'root');
+};
+
 // Compile the user schema once per request. Throws 400 when the schema itself is invalid.
 const compileSchema = (schema) => {
   if (schema.type !== 'object') {
@@ -65,4 +118,4 @@ const validate = (validator, data) => {
   return ajv.errorsText(validator.errors, { dataVar: 'json', separator: '; ' });
 };
 
-module.exports = { compileSchema, validate };
+module.exports = { toJsonSchema, compileSchema, validate };

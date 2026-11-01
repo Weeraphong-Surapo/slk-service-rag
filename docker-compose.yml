@@ -54,6 +54,12 @@ services:
 
   ollama:
     image: ollama/ollama:0.40.13
+    environment:
+      # Keep models loaded between requests (default 5m means a slow reload after a short break)
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-30m}
+      # 8-bit context cache uses about half the VRAM of the default, so the chat and OCR models fit together
+      OLLAMA_FLASH_ATTENTION: "1"
+      OLLAMA_KV_CACHE_TYPE: ${OLLAMA_KV_CACHE_TYPE:-q8_0}
     ports:
       - "127.0.0.1:${OLLAMA_HOST_PORT:-11434}:11434"
     volumes:

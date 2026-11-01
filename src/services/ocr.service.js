@@ -1,7 +1,7 @@
 const config = require('../config');
 const AppError = require('../utils/AppError');
 const { toOcrPng } = require('../utils/image');
-const { compileSchema, validate: validateJson } = require('../utils/jsonSchema');
+const { toJsonSchema, compileSchema, validate: validateJson } = require('../utils/jsonSchema');
 const ollamaService = require('./ollama.service');
 
 const MAX_PROMPT_LENGTH = 4000;
@@ -98,7 +98,7 @@ const resolveFormat = (format, prompt) => {
   return value;
 };
 
-// schema is a JSON Schema sent as a string in the multipart form
+// schema is sent as a string in the multipart form: a simple template or a full JSON Schema
 const parseSchema = (schema) => {
   const value = toTrimmedString(schema);
   if (value === '') {
@@ -112,13 +112,14 @@ const parseSchema = (schema) => {
   try {
     parsed = JSON.parse(value);
   } catch (err) {
-    throw new AppError('schema must be valid JSON', 400);
+    // err.message includes the position, e.g. "... at position 210 (line 1 column 211)"
+    throw new AppError(`schema is not valid JSON: ${err.message}`, 400);
   }
   if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new AppError('schema must be a JSON Schema object', 400);
+    throw new AppError('schema must be a JSON object, e.g. {"total":"number"}', 400);
   }
   // Returns { schema, validator }; fields inside the schema also accept null
-  return compileSchema(parsed);
+  return compileSchema(toJsonSchema(parsed));
 };
 
 // Read JSON from the model reply. Handles plain JSON, ```json fences and text around the object.
@@ -161,10 +162,14 @@ const missingRequiredKeys = (value, schema) => {
 // Parse and check one model reply. Returns { value } or { error }.
 // A missing top-level field usually means the model renamed it (e.g. store_name),
 // so ask for a fix first. Only on the last attempt fill it with null.
-const checkReply = (output, compiled, isLastAttempt) => {
+// prepare(value) can clean the value before validation, e.g. turn "1,250.00" into 1250.
+const checkReply = (output, compiled, isLastAttempt, prepare) => {
   const parsed = parseJsonReply(output);
   if (parsed.error !== undefined || compiled === null) {
     return parsed;
+  }
+  if (prepare !== undefined) {
+    prepare(parsed.value);
   }
 
   const missing = missingRequiredKeys(parsed.value, compiled.schema);
@@ -186,13 +191,18 @@ const checkReply = (output, compiled, isLastAttempt) => {
 };
 
 // Ask the model for JSON. When the reply is not valid, send the errors back once and ask for a fix.
-const extractJson = async (text, prompt, compiled) => {
+// options.sourceLabel describes where the text came from; options.prepare cleans values before validation.
+const extractJson = async (text, prompt, compiled, options = {}) => {
   let request = prompt;
   if (request === '') {
     request = DEFAULT_JSON_PROMPT;
   }
+  let sourceLabel = 'Text from the image';
+  if (options.sourceLabel !== undefined) {
+    sourceLabel = options.sourceLabel;
+  }
 
-  let userContent = `Text from the image:\n${text}\n\nRequest: ${request}`;
+  let userContent = `${sourceLabel}:\n${text}\n\nRequest: ${request}`;
   // Ollama recommends also putting the schema in the prompt
   let format = 'json';
   if (compiled !== null) {
@@ -208,7 +218,7 @@ const extractJson = async (text, prompt, compiled) => {
   let lastError = '';
   for (let attempt = 1; attempt <= MAX_JSON_ATTEMPTS; attempt += 1) {
     const output = await ollamaService.chatJson(messages, format);
-    const checked = checkReply(output, compiled, attempt === MAX_JSON_ATTEMPTS);
+    const checked = checkReply(output, compiled, attempt === MAX_JSON_ATTEMPTS, options.prepare);
     if (checked.error === undefined) {
       return checked.value;
     }
@@ -223,6 +233,9 @@ const extractJson = async (text, prompt, compiled) => {
 
   throw new AppError(`The model could not produce valid JSON: ${lastError}`, 502);
 };
+
+// Shared with other document types (e.g. bank statements)
+exports.extractJson = extractJson;
 
 // OCR an uploaded image, then build only the output that was asked for
 exports.ask = async ({ file, prompt, format, schema }) => {

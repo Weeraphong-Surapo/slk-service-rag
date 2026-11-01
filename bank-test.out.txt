@@ -1,0 +1,22 @@
+extract ms 24654
+account: {"bankName":"FIRST BANK OF WIKI","accountNo":"00005-123-456-7","accountName":"JOHN JONES","periodFrom":"2003-10-09","periodTo":"2003-11-08","openingBalance":0.55,"closingBalance":-72.47,"totalDebit":null,"totalCredit":1515.63,"currency":null,"periodFromRaw":"2003-10-09","periodToRaw":"2003-11-08"}
+check: {"balanceOk":true,"rowsProven":true,"order":"oldest-first","transactionCount":17,"firstRowChecked":true,"closingBalanceOk":true,"closingBalanceSource":"printed","totalsOk":false,"sumDebit":1515.63,"sumCredit":1442.61,"mismatchedRows":[],"correctedRows":[],"skippedBalanceRows":1,"pageCount":1,"tablePages":[1],"ocrPages":[1]}
+rows returned: 17 expected: 17
+OK  0 got {"page":1,"date":"2003-10-14","dateRaw":"2003-10-14","time":null,"description":"Payroll Deposit - HOTEL","debit":null,"credit":694.81,"balance":695.36} | exp ["2003-10-14",null,null,694.81,695.36]
+OK  1 got {"page":1,"date":"2003-10-14","dateRaw":"2003-10-14","time":null,"description":"Web Bill Payment - MASTERCARD","debit":200,"credit":null,"balance":495.36} | exp ["2003-10-14","9685",200,null,495.36]
+OK  2 got {"page":1,"date":"2003-10-16","dateRaw":"2003-10-16","time":null,"description":"ATM Withdrawal - INTERAC","debit":21.25,"credit":null,"balance":474.11} | exp ["2003-10-16","3990",21.25,null,474.11]
+OK  3 got {"page":1,"date":"2003-10-16","dateRaw":"2003-10-16","time":null,"description":"Fees - Interac","debit":1.5,"credit":null,"balance":472.61} | exp ["2003-10-16",null,1.5,null,472.61]
+OK  4 got {"page":1,"date":"2003-10-20","dateRaw":"2003-10-20","time":null,"description":"Interac Purchase - ELECTRONICS","debit":2.99,"credit":null,"balance":469.62} | exp ["2003-10-20","1975",2.99,null,469.62]
+OK  5 got {"page":1,"date":"2003-10-21","dateRaw":"2003-10-21","time":null,"description":"Web Bill Payment - AMEX","debit":300,"credit":null,"balance":169.62} | exp ["2003-10-21","3314",300,null,169.62]
+OK  6 got {"page":1,"date":"2003-10-22","dateRaw":"2003-10-22","time":null,"description":"ATM Withdrawal - FIRST BANK","debit":100,"credit":null,"balance":69.62} | exp ["2003-10-22","0064",100,null,69.62]
+OK  7 got {"page":1,"date":"2003-10-23","dateRaw":"2003-10-23","time":null,"description":"Interac Purchase - SUPERMARKET","debit":29.08,"credit":null,"balance":40.54} | exp ["2003-10-23","1559",29.08,null,40.54]
+OK  8 got {"page":1,"date":"2003-10-24","dateRaw":"2003-10-24","time":null,"description":"Interac Refund - ELECTRONICS","debit":null,"credit":2.99,"balance":43.53} | exp ["2003-10-24","1975",null,2.99,43.53]
+OK  9 got {"page":1,"date":"2003-10-27","dateRaw":"2003-10-27","time":null,"description":"Telephone Bill Payment - VISA","debit":6.77,"credit":null,"balance":36.76} | exp ["2003-10-27","2475",6.77,null,36.76]
+OK  10 got {"page":1,"date":"2003-10-28","dateRaw":"2003-10-28","time":null,"description":"Payroll Deposit - HOTEL","debit":null,"credit":694.81,"balance":731.57} | exp ["2003-10-28",null,null,694.81,731.57]
+OK  11 got {"page":1,"date":"2003-10-30","dateRaw":"2003-10-30","time":null,"description":"Web Funds Transfer - From SAVINGS","debit":null,"credit":50,"balance":781.57} | exp ["2003-10-30","2620",null,50,781.57]
+OK  12 got {"page":1,"date":"2003-11-03","dateRaw":"2003-11-03","time":null,"description":"Pre-Auth. Payment - INSURANCE","debit":33.55,"credit":null,"balance":748.02} | exp ["2003-11-03",null,33.55,null,748.02]
+OK  13 got {"page":1,"date":"2003-11-03","dateRaw":"2003-11-03","time":null,"description":"Cheque No. - 409","debit":100,"credit":null,"balance":648.02} | exp ["2003-11-03",null,100,null,648.02]
+OK  14 got {"page":1,"date":"2003-11-06","dateRaw":"2003-11-06","time":null,"description":"Mortgage Payment","debit":710.49,"credit":null,"balance":-62.47} | exp ["2003-11-06",null,710.49,null,-62.47]
+OK  15 got {"page":1,"date":"2003-11-07","dateRaw":"2003-11-07","time":null,"description":"Fees - Overdraft","debit":5,"credit":null,"balance":-67.47} | exp ["2003-11-07",null,5,null,-67.47]
+OK  16 got {"page":1,"date":"2003-11-08","dateRaw":"2003-11-08","time":null,"description":"Fees - Monthly","debit":5,"credit":null,"balance":-72.47} | exp ["2003-11-08",null,5,null,-72.47]
+done

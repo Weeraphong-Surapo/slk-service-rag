@@ -60,10 +60,21 @@ const imageUpload = multer({
   limits,
 });
 
+// Bank statements are sensitive: keep them in memory only, never on disk
+const statementUpload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: allowExtensions(['.pdf', ...IMAGE_EXTENSIONS]),
+  defParamCharset: 'utf8',
+  limits,
+});
+
 // One file in the "file" field
 const singleFile = withErrorHandling(documentUpload.single('file'));
 
 // One image in the "image" field (other text fields such as "prompt" are kept in req.body)
 const singleImage = withErrorHandling(imageUpload.single('image'));
 
-module.exports = { uploadDir, singleFile, singleImage };
+// One PDF or image in the "file" field (the "password" text field is kept in req.body)
+const singleStatement = withErrorHandling(statementUpload.single('file'));
+
+module.exports = { uploadDir, singleFile, singleImage, singleStatement };

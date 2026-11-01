@@ -71,13 +71,21 @@ exports.chatJson = async (messages, format) => {
     model,
     messages,
     stream: false,
-    options: { temperature: 0 },
+    options: { temperature: 0, num_ctx: config.ollama.jsonContextLength },
   };
+  const ensureComplete = (result) => {
+    if (result.done_reason === 'length') {
+      throw new AppError('JSON reply was cut off by the context window. Increase OLLAMA_JSON_NUM_CTX', 502);
+    }
+    return result.message.content;
+  };
+  // A long page can take minutes, so use the OCR timeout
+  const timeoutMs = config.ollama.ocrTimeoutMs;
 
-  if (!modelsWithoutFormat.has(model)) {
+  if (config.ollama.jsonFormat !== 'off' && !modelsWithoutFormat.has(model)) {
     try {
-      const result = await request('/api/chat', { ...body, format });
-      return result.message.content;
+      const result = await request('/api/chat', { ...body, format }, timeoutMs);
+      return ensureComplete(result);
     } catch (err) {
       if (!isGrammarError(err)) {
         throw err;
@@ -87,8 +95,8 @@ exports.chatJson = async (messages, format) => {
     }
   }
 
-  const result = await request('/api/chat', body);
-  return result.message.content;
+  const result = await request('/api/chat', body, timeoutMs);
+  return ensureComplete(result);
 };
 
 // Send one image (base64) with the OCR prompt to the OCR model
@@ -102,9 +110,16 @@ exports.ocr = async (prompt, imageBase64) => {
       // Greedy decoding without repeat penalty. Typhoon's suggested settings
       // (temperature 0.1, repeat_penalty 1.1) invented table values in our tests,
       // likely because the penalty pushes the model away from repeating numbers like "65 บาท".
-      options: { temperature: 0, repeat_penalty: 1.0 },
+      options: { temperature: 0, repeat_penalty: 1.0, num_ctx: config.ollama.ocrContextLength },
     },
     config.ollama.ocrTimeoutMs,
   );
+  // "length" means the reply hit the context limit and the text is incomplete
+  if (result.done_reason === 'length') {
+    throw new AppError(
+      'OCR text was cut off because the image is too large for the context window. Increase OLLAMA_OCR_NUM_CTX',
+      502,
+    );
+  }
   return result.message.content;
 };

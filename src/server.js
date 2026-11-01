@@ -2,6 +2,7 @@ const app = require('./app');
 const config = require('./config');
 const db = require('./config/database');
 const qdrantService = require('./services/qdrant.service');
+const ollamaService = require('./services/ollama.service');
 const retry = require('./utils/retry');
 
 const start = async () => {
@@ -13,6 +14,13 @@ const start = async () => {
   });
   // Multi-page bank statements can take several minutes (Node's default limit is 5 minutes)
   server.requestTimeout = 20 * 60 * 1000;
+
+  // In the background: the API already accepts requests while models load
+  if (config.ollama.warmUp) {
+    ollamaService.warmUp().catch((err) => {
+      console.log(`Warm-up failed: ${err.message}`);
+    });
+  }
 
   // Graceful shutdown
   const shutdown = () => {

@@ -53,7 +53,7 @@ docker compose logs -f api
 ครั้งแรกจะดาวน์โหลดโมเดล (หลาย GB) ผ่าน service `ollama-pull` API จะเริ่มหลังโหลดเสร็จ
 ดูความคืบหน้าด้วย `docker compose logs -f ollama-pull`
 
-ถ้ามี GPU NVIDIA:
+ถ้ามี GPU NVIDIA (รายละเอียด การตรวจ และการแก้ปัญหา ดู [docs/DOCKER_GPU.md](docs/DOCKER_GPU.md)):
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build

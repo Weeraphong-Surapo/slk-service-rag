@@ -48,9 +48,44 @@ exports.chat = async (messages) => {
     model: config.ollama.chatModel,
     messages,
     stream: false,
-    options: { temperature: 0.2 },
+    // Same num_ctx as chatJson: a different value makes Ollama reload the model
+    options: { temperature: 0.2, num_ctx: config.ollama.jsonContextLength },
   });
   return result.message.content;
+};
+
+// Load models into VRAM before the first user request (an empty request only loads the model).
+// num_ctx must match the real requests, otherwise Ollama reloads the model on the first call.
+exports.warmUp = async () => {
+  const jobs = [
+    {
+      name: config.ollama.chatModel,
+      path: '/api/generate',
+      body: { model: config.ollama.chatModel, options: { num_ctx: config.ollama.jsonContextLength } },
+    },
+    {
+      name: config.ollama.embedModel,
+      path: '/api/embed',
+      body: { model: config.ollama.embedModel, input: 'warm up' },
+    },
+  ];
+  if (config.ollama.warmUpOcr) {
+    jobs.push({
+      name: config.ollama.ocrModel,
+      path: '/api/generate',
+      body: { model: config.ollama.ocrModel, options: { num_ctx: config.ollama.ocrContextLength } },
+    });
+  }
+
+  for (const job of jobs) {
+    const started = Date.now();
+    try {
+      await request(job.path, job.body, config.ollama.ocrTimeoutMs);
+      console.log(`Warm-up: ${job.name} loaded in ${Date.now() - started} ms`);
+    } catch (err) {
+      console.log(`Warm-up: ${job.name} failed (${err.message})`);
+    }
+  }
 };
 
 // Ollama returns this when it cannot build the JSON grammar for a model.

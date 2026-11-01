@@ -49,6 +49,11 @@ module.exports = {
     // auto = try Ollama structured outputs first; off = prompt-only JSON (skip the try).
     // Typhoon 2.1 (Gemma 3) does not support structured outputs, so "off" saves a failed request.
     jsonFormat: process.env.OLLAMA_JSON_FORMAT || 'auto',
+    // Load the chat and embedding models when the API starts, so the first user does not wait
+    warmUp: process.env.OLLAMA_WARMUP !== 'false',
+    // Also load the OCR model. Off by default: with the 12B chat model it does not fit in 16 GB
+    // together, so it would push the chat model out again.
+    warmUpOcr: process.env.OLLAMA_WARMUP_OCR === 'true',
   },
 
   statement: {
